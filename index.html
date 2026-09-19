@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Spin the World 🌎</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: white;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 42px;	
+            color: #174a6e;
+        }
+
+        p {
+            font-size: 18px;
+        }
+
+        /* THE GLOBE */
+
+        /* REAL 3D EARTH */
+.globe-container {
+    width: 380px;
+    max-width: 380px;
+    height: 320px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+}
+
+#globe {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+#globe:active {
+    cursor: grabbing;
+}
+
+   
+
+        button {
+            font-size: 20px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: #287aa8;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1c5e82;
+        }
+
+        #result {
+            margin: 30px auto;
+            padding: 20px;
+            max-width: 500px;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .hint {
+            font-size: 15px;
+            color: #555;
+        }
+    </style>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+
+    <h1>🌎 Spin the World</h1>
+
+    <p>
+        Drag the globe or press SPIN!
+    </p>
+
+    <div class="globe-container">
+
+        <div id="globe"></div>
+
+    </div>
+
+    <p class="hint">
+        🖱️ Drag the globe to rotate it!
+    </p>
+
+    <button id="spinButton" onclick="spinGlobe()">
+        🌎 SPIN!
+    </button>
+
+    <div id="result">
+        <h2>Your destination will appear here!</h2>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+
+<script>
+
+
+
+const flagCodes = {
+    "Afghanistan": "af",
+    "Albania": "al",
+    "Algeria": "dz",
+    "Andorra": "ad",
+    "Angola": "ao",
+    "Antigua and Barbuda": "ag",
+    "Argentina": "ar",
+    "Armenia": "am",
+    "Australia": "au",
+    "Austria": "at",
+    "Azerbaijan": "az",
+    "Bahamas": "bs",
+    "Bahrain": "bh",
+    "Bangladesh": "bd",
+    "Barbados": "bb",
+    "Belarus": "by",
+    "Belgium": "be",
+    "Belize": "bz",
+    "Benin": "bj",
+    "Bhutan": "bt",
+    "Bolivia": "bo",
+    "Bosnia and Herzegovina": "ba",
+    "Botswana": "bw",
+    "Brazil": "br",
+    "Brunei": "bn",
+    "Bulgaria": "bg",
+    "Burkina Faso": "bf",
+    "Burundi": "bi",
+    "Cabo Verde": "cv",
+    "Cambodia": "kh",
+    "Cameroon": "cm",
+    "Canada": "ca",
+    "Central African Republic": "cf",
+    "Chad": "td",
+    "Chile": "cl",
+    "China": "cn",
+    "Colombia": "co",
+    "Comoros": "km",
+    "Costa Rica": "cr",
+    "Croatia": "hr",
+    "Cuba": "cu",
+    "Cyprus": "cy",
+    "Czechia": "cz",
+    "Democratic Republic of the Congo": "cd",
+    "Denmark": "dk",
+    "Djibouti": "dj",
+    "Dominica": "dm",
+    "Dominican Republic": "do",
+    "Ecuador": "ec",
+    "Egypt": "eg",
+    "El Salvador": "sv",
+    "Equatorial Guinea": "gq",
+    "Eritrea": "er",
+    "Estonia": "ee",
+    "Eswatini": "sz",
+    "Ethiopia": "et",
+    "Fiji": "fj",
+    "Finland": "fi",
+    "France": "fr",
+    "Gabon": "ga",
+    "Gambia": "gm",
+    "Georgia": "ge",
+    "Germany": "de",
+    "Ghana": "gh",
+    "Greece": "gr",
+    "Grenada": "gd",
+    "Guatemala": "gt",
+    "Guinea": "gn",
+    "Guinea-Bissau": "gw",
+    "Guyana": "gy",
+    "Haiti": "ht",
+    "Honduras": "hn",
+    "Hungary": "hu",
+    "Iceland": "is",
+    "India": "in",
+    "Indonesia": "id",
+    "Iran": "ir",
+    "Iraq": "iq",
+    "Ireland": "ie",
+    "Israel": "il",
+    "Italy": "it",
+    "Jamaica": "jm",
+    "Japan": "jp",
+    "Jordan": "jo",
+    "Kazakhstan": "kz",
+    "Kenya": "ke",
+    "Kiribati": "ki",
+    "Kuwait": "kw",
+    "Kyrgyzstan": "kg",
+    "Laos": "la",
+    "Latvia": "lv",
+    "Lebanon": "lb",
+    "Lesotho": "ls",
+    "Liberia": "lr",
+    "Libya": "ly",
+    "Liechtenstein": "li",
+    "Lithuania": "lt",
+    "Luxembourg": "lu",
+    "Madagascar": "mg",
+    "Malawi": "mw",
+    "Malaysia": "my",
+    "Maldives": "mv",
+    "Mali": "ml",
+    "Malta": "mt",
+    "Marshall Islands": "mh",
+    "Mauritania": "mr",
+    "Mauritius": "mu",
+    "Mexico": "mx",
+    "Micronesia": "fm",
+    "Moldova": "md",
+    "Monaco": "mc",
+    "Mongolia": "mn",
+    "Montenegro": "me",
+    "Morocco": "ma",
+    "Mozambique": "mz",
+    "Myanmar": "mm",
+    "Namibia": "na",
+    "Nauru": "nr",
+    "Nepal": "np",
+    "Netherlands": "nl",
+    "New Zealand": "nz",
+    "Nicaragua": "ni",
+    "Niger": "ne",
+    "Nigeria": "ng",
+    "North Korea": "kp",
+    "North Macedonia": "mk",
+    "Norway": "no",
+    "Oman": "om",
+    "Pakistan": "pk",
+    "Palau": "pw",
+    "Palestine": "ps",
+    "Panama": "pa",
+    "Papua New Guinea": "pg",
+    "Paraguay": "py",
+    "Peru": "pe",
+    "Philippines": "ph",
+    "Poland": "pl",
+    "Portugal": "pt",
+    "Qatar": "qa",
+    "Republic of the Congo": "cg",
+    "Romania": "ro",
+    "Russia": "ru",
+    "Rwanda": "rw",
+    "Saint Kitts and Nevis": "kn",
+    "Saint Lucia": "lc",
+    "Saint Vincent and the Grenadines": "vc",
+    "Samoa": "ws",
+    "San Marino": "sm",
+    "Sao Tome and Principe": "st",
+    "Saudi Arabia": "sa",
+    "Senegal": "sn",
+    "Serbia": "rs",
+    "Seychelles": "sc",
+    "Sierra Leone": "sl",
+    "Singapore": "sg",
+    "Slovakia": "sk",
+    "Slovenia": "si",
+    "Solomon Islands": "sb",
+    "Somalia": "so",
+    "South Africa": "za",
+    "South Korea": "kr",
+    "South Sudan": "ss",
+    "Spain": "es",
+    "Sri Lanka": "lk",
+    "Sudan": "sd",
+    "Suriname": "sr",
+    "Sweden": "se",
+    "Switzerland": "ch",
+    "Syria": "sy",
+    "Taiwan": "tw",
+    "Tajikistan": "tj",
+    "Tanzania": "tz",
+    "Thailand": "th",
+    "Timor-Leste": "tl",
+    "Togo": "tg",
+    "Tonga": "to",
+    "Trinidad and Tobago": "tt",
+    "Tunisia": "tn",
+    "Turkey": "tr",
+    "Turkmenistan": "tm",
+    "Tuvalu": "tv",
+    "Uganda": "ug",
+    "Ukraine": "ua",
+    "United Arab Emirates": "ae",
+    "United Kingdom": "gb",
+    "United States": "us",
+    "Uruguay": "uy",
+    "Uzbekistan": "uz",
+    "Vanuatu": "vu",
+    "Vatican City": "va",
+    "Venezuela": "ve",
+    "Vietnam": "vn",
+    "Yemen": "ye",
+    "Zambia": "zm",
+    "Zimbabwe": "zw"
+};   
+const countries = [
+
+      // ==================== AFRICA ====================
+
+    {
+        name: "Algeria",
+        capital: "Algiers",
+        continent: "Africa",
+        flag: "https://flagcdn.com/w320/dz.png",
+        fact: "Algeria is the largest country in Africa."
+    },
+    {
+        name: "Angola",
+        capital: "Luanda",
+        continent: "Africa",
+        fact: "Angola is home to the rare giant sable antelope."
+    },
+    {
+        name: "Benin",
+        capital: "Porto-Novo",
+        continent: "Africa",
+        fact: "Benin is famous for its history and the ancient Kingdom of Dahomey."
+    },
+    {
+        name: "Botswana",
+        capital: "Gaborone",
+        continent: "Africa",
+        fact: "Botswana is home to the Okavango Delta."
+    },
+    {
+        name: "Burkina Faso",
+        capital: "Ouagadougou",
+        continent: "Africa",
+        fact: "The name Burkina Faso means 'land of upright people.'"
+    },
+    {
+        name: "Burundi",
+        capital: "Gitega",
+        continent: "Africa",
+        fact: "Burundi is one of Africa's smallest countries, but one of it's biggest coffee makers."
+    },
+    {
+        name: "Cabo Verde",
+        capital: "Praia",
+        continent: "Africa",
+        fact: "Cabo Verde is an island country made up of volcanic islands."
+    },
+    {
+        name: "Cameroon",
+        capital: "Yaoundé",
+        continent: "Africa",
+        fact: "Cameroon has landscapes ranging from rainforests to mountains."
+    },
+    {
+        name: "Central African Republic",
+        capital: "Bangui",
+        continent: "Africa",
+        fact: "The Central African Republic is a landlocked country in the center of Africa."
+    },
+    {
+        name: "Chad",
+        capital: "N'Djamena",
+        continent: "Africa",
+        fact: "Much of northern Chad is covered by the Sahara Desert. It also shares a flag with Romania!"
+    },
+    {
+        name: "Comoros",
+        capital: "Moroni",
+        continent: "Africa",
+        fact: "Comoros is an island nation in the Indian Ocean."
+    },
+    {
+        name: "Democratic Republic of the Congo",
+        capital: "Kinshasa",
+        continent: "Africa",
+        fact: "The Congo rainforest is the second-largest tropical rainforest in the world."
+    },
+    {
+        name: "Republic of the Congo",
+        capital: "Brazzaville",
+        continent: "Africa",
+        fact: "Brazzaville is located directly across the Congo River from Kinshasa."
+    },
+    {
+        name: "Djibouti",
+        capital: "Djibouti",
+        continent: "Africa",
+        fact: "Djibouti sits near the meeting point of the Red Sea and Gulf of Aden. Funny name, eh?"
+    },
+    {
+        name: "Egypt",
+        capital: "Cairo",
+        continent: "Africa",
+        fact: "The Great Pyramid of Giza is the only surviving ancient Wonder of the World."
+    },
+    {
+        name: "Equatorial Guinea",
+        capital: "Malabo",
+        continent: "Africa",
+        fact: "Equatorial Guinea is the only African country with Spanish as an official language. It also looks like a square."
+    },
+    {
+        name: "Eritrea",
+        capital: "Asmara",
+        continent: "Africa",
+        fact: "Eritrea has a long coastline along the Red Sea, and is one of two countries (along with north korea,) that doesn't let it's citizens leave the country."
+    },
+    {
+        name: "Eswatini",
+        capital: "Mbabane",
+        continent: "Africa",
+        fact: "Eswatini is one of Africa's remaining monarchies. It changed it's name in 2018 from Swaziland"
+    },
+    {
+        name: "Ethiopia",
+        capital: "Addis Ababa",
+        continent: "Africa",
+        fact: "Ethiopia has its own calendar that differs from the Gregorian calendar. In fact, as of 20266, they are entering covid!"
+    },
+    {
+        name: "Gabon",
+        capital: "Libreville",
+        continent: "Africa",
+        fact: "Gabon contains large areas of tropical rainforest."
+    },
+    {
+        name: "Gambia",
+        capital: "Banjul",
+        continent: "Africa",
+        fact: "The Gambia is almost completely surrounded by Senegal."
+    },
+    {
+        name: "Ghana",
+        capital: "Accra",
+        continent: "Africa",
+        fact: "Ghana is one of the world's major cocoa-producing countries."
+    },
+    {
+        name: "Guinea",
+        capital: "Conakry",
+        continent: "Africa",
+        fact: "Guinea contains the sources of several major West African rivers."
+    },
+    {
+        name: "Guinea-Bissau",
+        capital: "Bissau",
+        continent: "Africa",
+        fact: "Guinea-Bissau includes the beautiful Bijagós Islands."
+    },
+    {
+        name: "Côte d'Ivoire",
+        capital: "Yamoussoukro",
+        continent: "Africa",
+        fact: "Côte d'Ivoire is one of the world's largest cocoa producers."
+    },
+    {
+        name: "Kenya",
+        capital: "Nairobi",
+        continent: "Africa",
+        fact: "Kenya is famous for its wildlife and the Great Rift Valley."
+    },
+    {
+        name: "Lesotho",
+        capital: "Maseru",
+        continent: "Africa",
+        fact: "Lesotho is completely surrounded by South Africa."
+    },
+    {
+        name: "Liberia",
+        capital: "Monrovia",
+        continent: "Africa",
+        fact: "Liberia's capital, Monrovia, is named after James Monroe, making it one of two capitals with a US president as a name. It was (and still is) the only country with a Ballon d'Or winner as president."
+    },
+    {
+        name: "Libya",
+        capital: "Tripoli",
+        continent: "Africa",
+        fact: "Most of Libya is covered by the Sahara Desert."
+    },
+    {
+        name: "Madagascar",
+        capital: "Antananarivo",
+        continent: "Africa",
+        fact: "Madagascar is famous for lemurs, which are native to the island."
+    },
+    {
+        name: "Malawi",
+        capital: "Lilongwe",
+        continent: "Africa",
+        fact: "Lake Malawi contains hundreds of species of freshwater fish."
+    },
+    {
+        name: "Mali",
+        capital: "Bamako",
+        continent: "Africa",
+        fact: "Timbuktu was once an important center of learning and trade."
+    },
+    {
+        name: "Mauritania",
+        capital: "Nouakchott",
+        continent: "Africa",
+        fact: "Much of Mauritania lies within the Sahara Desert."
+    },
+    {
+        name: "Mauritius",
+        capital: "Port Louis",
+        continent: "Africa",
+        fact: "The extinct dodo bird lived only on Mauritius."
+    },
+    {
+        name: "Morocco",
+        capital: "Rabat",
+        continent: "Africa",
+        fact: "Morocco is home to the Atlas Mountains. It is also known for soccer players like Achraf Hakimi."
+    },
+    {
+        name: "Mozambique",
+        capital: "Maputo",
+        continent: "Africa",
+        fact: "Mozambique has a long coastline along the Indian Ocean."
+    },
+    {
+        name: "Namibia",
+        capital: "Windhoek",
+        continent: "Africa",
+        fact: "Namibia contains the Namib Desert, one of the world's oldest deserts."
+    },
+    {
+        name: "Niger",
+        capital: "Niamey",
+        continent: "Africa",
+        fact: "Much of Niger is covered by the Sahara Desert."
+    },
+    {
+        name: "Nigeria",
+        capital: "Abuja",
+        continent: "Africa",
+        fact: "Nigeria is Africa's most populous country, with over 200 million people!."
+    },
+    {
+        name: "Rwanda",
+        capital: "Kigali",
+        continent: "Africa",
+        fact: "Rwanda is known as the 'Land of a Thousand Hills.'"
+    },
+    {
+        name: "São Tomé and Príncipe",
+        capital: "São Tomé",
+        continent: "Africa",
+        fact: "São Tomé and Príncipe is one of Africa's smallest countries."
+    },
+    {
+        name: "Senegal",
+        capital: "Dakar",
+        continent: "Africa",
+        fact: "Dakar is located near the westernmost point of mainland Africa."
+    },
+    {
+        name: "Seychelles",
+        capital: "Victoria",
+        continent: "Africa",
+        fact: "Seychelles is an archipelago of more than 100 islands."
+    },
+    {
+        name: "Sierra Leone",
+        capital: "Freetown",
+        continent: "Africa",
+        fact: "Freetown was founded as a settlement for formerly enslaved people. It also kind of looks like a circle."
+    },
+    {
+        name: "Somalia",
+        capital: "Mogadishu",
+        continent: "Africa",
+        fact: "Somalia has one of the longest coastlines in mainland Africa."
+    },
+    {
+        name: "South Africa",
+        capital: "Pretoria, Cape Town, and Bloemfontein",
+        continent: "Africa",
+        fact: "South Africa has three capital cities with different government functions."
+    },
+    {
+        name: "South Sudan",
+        capital: "Juba",
+        continent: "Africa",
+        fact: "South Sudan became independent in 2011 making it the youngest country in the world! But not for long...."
+    },
+    {
+        name: "Sudan",
+        capital: "Khartoum",
+        continent: "Africa",
+        fact: "The Blue Nile and White Nile meet near Khartoum."
+    },
+    {
+        name: "Tanzania",
+        capital: "Dodoma",
+        continent: "Africa",
+        fact: "Mount Kilimanjaro is the highest mountain in Africa."
+    },
+    {
+        name: "Togo",
+        capital: "Lomé",
+        continent: "Africa",
+        fact: "Togo is one of Africa's narrowest countries."
+    },
+    {
+        name: "Tunisia",
+        capital: "Tunis",
+        continent: "Africa",
+        fact: "Ancient Carthage was located in modern-day Tunisia."
+    },
+    {
+        name: "Uganda",
+        capital: "Kampala",
+        continent: "Africa",
+        fact: "Uganda shares Lake Victoria with Kenya and Tanzania."
+    },
+    {
+        name: "Zambia",
+        capital: "Lusaka",
+        continent: "Africa",
+        fact: "Victoria Falls lies on the border between Zambia and Zimbabwe."
+    },
+    {
+        name: "Zimbabwe",
+        capital: "Harare",
+        continent: "Africa",
+        fact: "Zimbabwe takes its name from Great Zimbabwe, an ancient stone city."
+    },
+
+    // ==================== ASIA ====================
+
+    {
+        name: "Afghanistan",
+        capital: "Kabul",
+        continent: "Asia",
+        fact: "Afghanistan is a landlocked country with many mountainous regions."
+    },
+    {
+        name: "Armenia",
+        capital: "Yerevan",
+        continent: "Asia",
+        fact: "Armenia is one of the world's oldest Christian countries."
+    },
+    {
+        name: "Azerbaijan",
+        capital: "Baku",
+        continent: "Asia",
+        fact: "Azerbaijan is sometimes called the 'Land of Fire.'"
+    },
+    {
+        name: "Bahrain",
+        capital: "Manama",
+        continent: "Asia",
+        fact: "Bahrain is an island country in the Persian Gulf."
+    },
+    {
+        name: "Bangladesh",
+        capital: "Dhaka",
+        continent: "Asia",
+        fact: "Bangladesh is home to the world's largest river delta."
+    },
+    {
+        name: "Bhutan",
+        capital: "Thimphu",
+        continent: "Asia",
+        fact: "Bhutan is famous for measuring Gross National Happiness."
+    },
+    {
+        name: "Brunei",
+        capital: "Bandar Seri Begawan",
+        continent: "Asia",
+        fact: "Brunei is located on the island of Borneo."
+    },
+    {
+        name: "Cambodia",
+        capital: "Phnom Penh",
+        continent: "Asia",
+        fact: "Angkor Wat is one of the world's largest religious monuments."
+    },
+    {
+        name: "China",
+        capital: "Beijing",
+        continent: "Asia",
+        fact: "China is home to the giant panda."
+    },
+    {
+        name: "Cyprus",
+        capital: "Nicosia",
+        continent: "Asia",
+        fact: "Nicosia is a divided capital city."
+    },
+    {
+        name: "Georgia",
+        capital: "Tbilisi",
+        continent: "Asia",
+        fact: "Georgia has one of the world's oldest winemaking traditions."
+    },
+    {
+        name: "India",
+        capital: "New Delhi",
+        continent: "Asia",
+        fact: "India is home to the Taj Mahal."
+    },
+    {
+        name: "Indonesia",
+        capital: "Jakarta",
+        continent: "Asia",
+        fact: "Indonesia is made up of thousands of islands."
+    },
+    {
+        name: "Iran",
+        capital: "Tehran",
+        continent: "Asia",
+        fact: "Iran was historically known as Persia."
+    },
+    {
+        name: "Iraq",
+        capital: "Baghdad",
+        continent: "Asia",
+        fact: "Ancient Mesopotamia developed between the Tigris and Euphrates rivers."
+    },
+    {
+        name: "Israel",
+        capital: "Jerusalem",
+        continent: "Asia",
+        fact: "The Dead Sea is one of the saltiest large bodies of water on Earth."
+    },
+    {
+        name: "Japan",
+        capital: "Tokyo",
+        continent: "Asia",
+        fact: "Japan is made up of thousands of islands."
+    },
+    {
+        name: "Jordan",
+        capital: "Amman",
+        continent: "Asia",
+        fact: "The ancient city of Petra is located in Jordan."
+    },
+    {
+        name: "Kazakhstan",
+        capital: "Astana",
+        continent: "Asia",
+        fact: "Kazakhstan is the world's largest landlocked country."
+    },
+    {
+        name: "Kuwait",
+        capital: "Kuwait City",
+        continent: "Asia",
+        fact: "Kuwait is one of the world's smallest countries by area."
+    },
+    {
+        name: "Kyrgyzstan",
+        capital: "Bishkek",
+        continent: "Asia",
+        fact: "Kyrgyzstan is dominated by the Tian Shan mountain range."
+    },
+    {
+        name: "Laos",
+        capital: "Vientiane",
+        continent: "Asia",
+        fact: "Laos is the only landlocked country in Southeast Asia."
+    },
+    {
+        name: "Lebanon",
+        capital: "Beirut",
+        continent: "Asia",
+        fact: "Lebanon's cedar tree is an important national symbol."
+    },
+    {
+        name: "Malaysia",
+        capital: "Kuala Lumpur",
+        continent: "Asia",
+        fact: "Malaysia has territory on both the Asian mainland and Borneo."
+    },
+    {
+        name: "Maldives",
+        capital: "Malé",
+        continent: "Asia",
+        fact: "The Maldives is the world's lowest-lying country."
+    },
+    {
+        name: "Mongolia",
+        capital: "Ulaanbaatar",
+        continent: "Asia",
+        fact: "Mongolia is famous for the vast Gobi Desert."
+    },
+    {
+        name: "Myanmar",
+        capital: "Naypyidaw",
+        continent: "Asia",
+        fact: "Myanmar was formerly known as Burma."
+    },
+    {
+        name: "Nepal",
+        capital: "Kathmandu",
+        continent: "Asia",
+        fact: "Mount Everest lies on Nepal's border with China."
+    },
+    {
+        name: "North Korea",
+        capital: "Pyongyang",
+        continent: "Asia",
+        fact: "North Korea occupies the northern part of the Korean Peninsula."
+    },
+    {
+        name: "Oman",
+        capital: "Muscat",
+        continent: "Asia",
+        fact: "Oman has a long coastline along the Arabian Sea."
+    },
+    {
+        name: "Pakistan",
+        capital: "Islamabad",
+        continent: "Asia",
+        fact: "Pakistan is home to K2, the world's second-highest mountain."
+    },
+    {
+        name: "Palestine",
+        capital: "East Jerusalem (claimed); Ramallah is the administrative center",
+        continent: "Asia",
+        fact: "The State of Palestine has non-member observer State status at the United Nations."
+    },
+    {
+        name: "Philippines",
+        capital: "Manila",
+        continent: "Asia",
+        fact: "The Philippines is an archipelago of more than 7,000 islands."
+    },
+    {
+        name: "Qatar",
+        capital: "Doha",
+        continent: "Asia",
+        fact: "Qatar is a peninsula extending into the Persian Gulf."
+    },
+    {
+        name: "Saudi Arabia",
+        capital: "Riyadh",
+        continent: "Asia",
+        fact: "Saudi Arabia occupies most of the Arabian Peninsula."
+    },
+    {
+        name: "Singapore",
+        capital: "Singapore",
+        continent: "Asia",
+        fact: "Singapore is both a country and a city."
+    },
+    {
+        name: "South Korea",
+        capital: "Seoul",
+        continent: "Asia",
+        fact: "South Korea has a landscape dominated by mountains and hills."
+    },
+    {
+        name: "Sri Lanka",
+        capital: "Sri Jayawardenepura Kotte",
+        continent: "Asia",
+        fact: "Sri Lanka is an island nation just southeast of India."
+    },
+    {
+        name: "Syria",
+        capital: "Damascus",
+        continent: "Asia",
+        fact: "Damascus is one of the world's oldest continuously inhabited cities."
+    },
+    {
+        name: "Tajikistan",
+        capital: "Dushanbe",
+        continent: "Asia",
+        fact: "Tajikistan is one of the world's most mountainous countries."
+    },
+    {
+        name: "Thailand",
+        capital: "Bangkok",
+        continent: "Asia",
+        fact: "Thailand was historically known as Siam."
+    },
+    {
+        name: "Timor-Leste",
+        capital: "Dili",
+        continent: "Asia",
+        fact: "Timor-Leste is one of Asia's newest independent countries."
+    },
+    {
+        name: "Turkey",
+        capital: "Ankara",
+        continent: "Asia",
+        fact: "Turkey has territory in both Europe and Asia."
+    },
+    {
+        name: "Turkmenistan",
+        capital: "Ashgabat",
+        continent: "Asia",
+        fact: "Much of Turkmenistan is covered by the Karakum Desert."
+    },
+    {
+        name: "United Arab Emirates",
+        capital: "Abu Dhabi",
+        continent: "Asia",
+        fact: "The United Arab Emirates is a federation of seven emirates."
+    },
+    {
+        name: "Uzbekistan",
+        capital: "Tashkent",
+        continent: "Asia",
+        fact: "Uzbekistan is one of only two doubly landlocked countries."
+    },
+    {
+        name: "Vietnam",
+        capital: "Hanoi",
+        continent: "Asia",
+        fact: "Vietnam has a long coastline along the South China Sea."
+    },
+    {
+        name: "Yemen",
+        capital: "Sana'a",
+        continent: "Asia",
+        fact: "Yemen is home to the unusual dragon blood trees of Socotra."
+    },
+
+    // ==================== EUROPE ====================
+
+    {
+        name: "Albania",
+        capital: "Tirana",
+        continent: "Europe",
+        fact: "Albania has coastlines on both the Adriatic and Ionian seas."
+    },
+    {
+        name: "Andorra",
+        capital: "Andorra la Vella",
+        continent: "Europe",
+        fact: "Andorra is a tiny mountainous country in the Pyrenees."
+    },
+    {
+        name: "Austria",
+        capital: "Vienna",
+        continent: "Europe",
+        fact: "Austria is famous for the Alps and classical music."
+    },
+    {
+        name: "Belarus",
+        capital: "Minsk",
+        continent: "Europe",
+        fact: "Belarus is home to the ancient Białowieża Forest."
+    },
+    {
+        name: "Belgium",
+        capital: "Brussels",
+        continent: "Europe",
+        fact: "Belgium is famous for chocolate, waffles, and comic art."
+    },
+    {
+        name: "Bosnia and Herzegovina",
+        capital: "Sarajevo",
+        continent: "Europe",
+        fact: "Bosnia and Herzegovina has a small coastline on the Adriatic Sea."
+    },
+    {
+        name: "Bulgaria",
+        capital: "Sofia",
+        continent: "Europe",
+        fact: "Bulgaria is one of Europe's oldest continuously existing states."
+    },
+    {
+        name: "Croatia",
+        capital: "Zagreb",
+        continent: "Europe",
+        fact: "Croatia has thousands of islands and islets along its Adriatic coast."
+    },
+    {
+        name: "Czechia",
+        capital: "Prague",
+        continent: "Europe",
+        fact: "Prague is famous for its historic Charles Bridge."
+    },
+    {
+        name: "Denmark",
+        capital: "Copenhagen",
+        continent: "Europe",
+        fact: "The Kingdom of Denmark includes Greenland and the Faroe Islands."
+    },
+    {
+        name: "Estonia",
+        capital: "Tallinn",
+        continent: "Europe",
+        fact: "Estonia is famous for its digital government services."
+    },
+    {
+        name: "Finland",
+        capital: "Helsinki",
+        continent: "Europe",
+        fact: "Finland has thousands of lakes."
+    },
+    {
+        name: "France",
+        capital: "Paris",
+        continent: "Europe",
+        fact: "France has territory in several parts of the world through its overseas regions."
+    },
+    {
+        name: "Germany",
+        capital: "Berlin",
+        continent: "Europe",
+        fact: "Germany is home to more than 2,000 castles and castle ruins."
+    },
+    {
+        name: "Greece",
+        capital: "Athens",
+        continent: "Europe",
+        fact: "Ancient Greece influenced modern philosophy, science, art, and democracy."
+    },
+    {
+        name: "Hungary",
+        capital: "Budapest",
+        continent: "Europe",
+        fact: "Budapest is famous for its thermal baths."
+    },
+    {
+        name: "Iceland",
+        capital: "Reykjavík",
+        continent: "Europe",
+        fact: "Iceland has volcanoes, glaciers, and geothermal activity."
+    },
+    {
+        name: "Ireland",
+        capital: "Dublin",
+        continent: "Europe",
+        fact: "Ireland is famous for its green landscapes and literary tradition."
+    },
+    {
+        name: "Italy",
+        capital: "Rome",
+        continent: "Europe",
+        fact: "Vatican City is completely surrounded by Rome."
+    },
+    {
+        name: "Latvia",
+        capital: "Riga",
+        continent: "Europe",
+        fact: "Latvia has a long coastline along the Baltic Sea."
+    },
+    {
+        name: "Liechtenstein",
+        capital: "Vaduz",
+        continent: "Europe",
+        fact: "Liechtenstein is one of the world's smallest countries."
+    },
+    {
+        name: "Lithuania",
+        capital: "Vilnius",
+        continent: "Europe",
+        fact: "Lithuania was once part of one of Europe's largest medieval states."
+    },
+    {
+        name: "Luxembourg",
+        capital: "Luxembourg",
+        continent: "Europe",
+        fact: "Luxembourg is one of the world's smallest countries."
+    },
+    {
+        name: "Malta",
+        capital: "Valletta",
+        continent: "Europe",
+        fact: "Malta is a small Mediterranean island country."
+    },
+    {
+        name: "Moldova",
+        capital: "Chișinău",
+        continent: "Europe",
+        fact: "Moldova is famous for its underground wine cellars."
+    },
+    {
+        name: "Monaco",
+        capital: "Monaco",
+        continent: "Europe",
+        fact: "Monaco is one of the world's smallest countries."
+    },
+    {
+        name: "Montenegro",
+        capital: "Podgorica",
+        continent: "Europe",
+        fact: "Montenegro means 'Black Mountain.'"
+    },
+    {
+        name: "Netherlands",
+        capital: "Amsterdam",
+        continent: "Europe",
+        fact: "A significant portion of the Netherlands lies below sea level."
+    },
+    {
+        name: "North Macedonia",
+        capital: "Skopje",
+        continent: "Europe",
+        fact: "Lake Ohrid is one of Europe's oldest lakes."
+    },
+    {
+        name: "Norway",
+        capital: "Oslo",
+        continent: "Europe",
+        fact: "Norway is famous for its spectacular fjords."
+    },
+    {
+        name: "Poland",
+        capital: "Warsaw",
+        continent: "Europe",
+        fact: "Poland is home to the European bison."
+    },
+    {
+        name: "Portugal",
+        capital: "Lisbon",
+        continent: "Europe",
+        fact: "Portugal is one of Europe's oldest nation-states."
+    },
+    {
+        name: "Romania",
+        capital: "Bucharest",
+        continent: "Europe",
+        fact: "Romania is home to the Carpathian Mountains."
+    },
+    {
+        name: "Russia",
+        capital: "Moscow",
+        continent: "Europe and Asia",
+        fact: "Russia is the world's largest country by area."
+    },
+    {
+        name: "San Marino",
+        capital: "San Marino",
+        continent: "Europe",
+        fact: "San Marino is one of the world's oldest surviving republics."
+    },
+    {
+        name: "Serbia",
+        capital: "Belgrade",
+        continent: "Europe",
+        fact: "Belgrade sits where the Sava and Danube rivers meet."
+    },
+    {
+        name: "Slovakia",
+        capital: "Bratislava",
+        continent: "Europe",
+        fact: "Slovakia has many castles and mountainous landscapes."
+    },
+    {
+        name: "Slovenia",
+        capital: "Ljubljana",
+        continent: "Europe",
+        fact: "Slovenia contains part of the Alps and has a small Adriatic coastline."
+    },
+    {
+        name: "Spain",
+        capital: "Madrid",
+        continent: "Europe",
+        fact: "Spain has territory and islands in both the Atlantic and Mediterranean."
+    },
+    {
+        name: "Sweden",
+        capital: "Stockholm",
+        continent: "Europe",
+        fact: "Sweden has thousands of islands along its coast."
+    },
+    {
+        name: "Switzerland",
+        capital: "Bern",
+        continent: "Europe",
+        fact: "Switzerland has four national languages."
+    },
+    {
+        name: "Ukraine",
+        capital: "Kyiv",
+        continent: "Europe",
+        fact: "Ukraine is one of Europe's largest countries by area."
+    },
+    {
+        name: "United Kingdom",
+        capital: "London",
+        continent: "Europe",
+        fact: "The United Kingdom is made up of four constituent countries."
+    },
+    {
+        name: "Vatican City",
+        capital: "Vatican City",
+        continent: "Europe",
+        fact: "Vatican City is the world's smallest sovereign state by area."
+    },
+
+    // ==================== NORTH AMERICA ====================
+
+    {
+        name: "Antigua and Barbuda",
+        capital: "Saint John's",
+        continent: "North America",
+        fact: "Antigua and Barbuda is made up of two main islands and smaller islands."
+    },
+    {
+        name: "Bahamas",
+        capital: "Nassau",
+        continent: "North America",
+        fact: "The Bahamas is an archipelago of hundreds of islands and cays."
+    },
+    {
+        name: "Barbados",
+        capital: "Bridgetown",
+        continent: "North America",
+        fact: "Barbados is a coral island in the Caribbean."
+    },
+    {
+        name: "Belize",
+        capital: "Belmopan",
+        continent: "North America",
+        fact: "Belize is home to part of the Mesoamerican Barrier Reef."
+    },
+    {
+        name: "Canada",
+        capital: "Ottawa",
+        continent: "North America",
+        fact: "Canada has the world's longest coastline."
+    },
+    {
+        name: "Costa Rica",
+        capital: "San José",
+        continent: "North America",
+        fact: "Costa Rica is famous for its biodiversity and national parks."
+    },
+    {
+        name: "Cuba",
+        capital: "Havana",
+        continent: "North America",
+        fact: "Cuba is the largest island in the Caribbean."
+    },
+    {
+        name: "Dominica",
+        capital: "Roseau",
+        continent: "North America",
+        fact: "Dominica is known for its mountainous rainforest and volcanic landscapes."
+    },
+    {
+        name: "Dominican Republic",
+        capital: "Santo Domingo",
+        continent: "North America",
+        fact: "Santo Domingo is one of the oldest European-founded cities in the Americas."
+    },
+    {
+        name: "El Salvador",
+        capital: "San Salvador",
+        continent: "North America",
+        fact: "El Salvador is the smallest country in mainland Central America."
+    },
+    {
+        name: "Grenada",
+        capital: "St. George's",
+        continent: "North America",
+        fact: "Grenada is sometimes called the 'Spice Island.'"
+    },
+    {
+        name: "Guatemala",
+        capital: "Guatemala City",
+        continent: "North America",
+        fact: "Guatemala is home to many ancient Maya sites."
+    },
+    {
+        name: "Haiti",
+        capital: "Port-au-Prince",
+        continent: "North America",
+        fact: "Haiti occupies the western part of the island of Hispaniola."
+    },
+    {
+        name: "Honduras",
+        capital: "Tegucigalpa",
+        continent: "North America",
+        fact: "Honduras contains the ancient Maya city of Copán."
+    },
+    {
+        name: "Jamaica",
+        capital: "Kingston",
+        continent: "North America",
+        fact: "Jamaica is famous worldwide for reggae music."
+    },
+    {
+        name: "Mexico",
+        capital: "Mexico City",
+        continent: "North America",
+        fact: "Mexico is home to ancient Maya and Aztec archaeological sites."
+    },
+    {
+        name: "Nicaragua",
+        capital: "Managua",
+        continent: "North America",
+        fact: "Nicaragua has large freshwater lakes and active volcanoes."
+    },
+    {
+        name: "Panama",
+        capital: "Panama City",
+        continent: "North America",
+        fact: "The Panama Canal connects the Atlantic and Pacific oceans."
+    },
+    {
+        name: "Saint Kitts and Nevis",
+        capital: "Basseterre",
+        continent: "North America",
+        fact: "Saint Kitts and Nevis is the smallest sovereign country in the Americas by area."
+    },
+    {
+        name: "Saint Lucia",
+        capital: "Castries",
+        continent: "North America",
+        fact: "Saint Lucia is famous for the twin volcanic peaks called the Pitons."
+    },
+    {
+        name: "Saint Vincent and the Grenadines",
+        capital: "Kingstown",
+        continent: "North America",
+        fact: "The country consists of one main island and many smaller islands."
+    },
+    {
+        name: "Trinidad and Tobago",
+        capital: "Port of Spain",
+        continent: "North America",
+        fact: "Trinidad and Tobago is the birthplace of steelpan music."
+    },
+    {
+        name: "United States",
+        capital: "Washington, D.C.",
+        continent: "North America",
+        fact: "The United States has 50 states."
+    },
+
+    // ==================== SOUTH AMERICA ====================
+
+    {
+        name: "Argentina",
+        capital: "Buenos Aires",
+        continent: "South America",
+        fact: "Argentina is home to Aconcagua, the highest mountain outside Asia."
+    },
+    {
+        name: "Bolivia",
+        capital: "Sucre",
+        continent: "South America",
+        fact: "Bolivia's Salar de Uyuni is the world's largest salt flat."
+    },
+    {
+        name: "Brazil",
+        capital: "Brasília",
+        continent: "South America",
+        fact: "Brazil contains a huge portion of the Amazon rainforest."
+    },
+    {
+        name: "Chile",
+        capital: "Santiago",
+        continent: "South America",
+        fact: "Chile is one of the world's longest and narrowest countries."
+    },
+    {
+        name: "Colombia",
+        capital: "Bogotá",
+        continent: "South America",
+        fact: "Colombia is one of the world's most biodiverse countries."
+    },
+    {
+        name: "Ecuador",
+        capital: "Quito",
+        continent: "South America",
+        fact: "The Galápagos Islands are part of Ecuador."
+    },
+    {
+        name: "Guyana",
+        capital: "Georgetown",
+        continent: "South America",
+        fact: "Guyana is the only English-speaking country in South America."
+    },
+    {
+        name: "Paraguay",
+        capital: "Asunción",
+        continent: "South America",
+        fact: "Paraguay is one of only two landlocked countries in South America."
+    },
+    {
+        name: "Peru",
+        capital: "Lima",
+        continent: "South America",
+        fact: "Machu Picchu was built by the Inca civilization."
+    },
+    {
+        name: "Suriname",
+        capital: "Paramaribo",
+        continent: "South America",
+        fact: "Suriname is the smallest independent country in South America by area."
+    },
+    {
+        name: "Uruguay",
+        capital: "Montevideo",
+        continent: "South America",
+        fact: "Uruguay is one of the smallest countries in South America."
+    },
+    {
+        name: "Venezuela",
+        capital: "Caracas",
+        continent: "South America",
+        fact: "Angel Falls is the world's highest uninterrupted waterfall."
+    },
+
+    // ==================== OCEANIA ====================
+
+    {
+        name: "Australia",
+        capital: "Canberra",
+        continent: "Oceania",
+        fact: "Australia is both a country and a continent."
+    },
+    {
+        name: "Fiji",
+        capital: "Suva",
+        continent: "Oceania",
+        fact: "Fiji is an island nation made up of more than 300 islands."
+    },
+    {
+        name: "Kiribati",
+        capital: "South Tarawa",
+        continent: "Oceania",
+        fact: "Kiribati is spread across a huge area of the Pacific Ocean."
+    },
+    {
+        name: "Marshall Islands",
+        capital: "Majuro",
+        continent: "Oceania",
+        fact: "The Marshall Islands consist of many coral atolls and islands."
+    },
+    {
+        name: "Micronesia",
+        capital: "Palikir",
+        continent: "Oceania",
+        fact: "The Federated States of Micronesia consists of four island states."
+    },
+    {
+        name: "Nauru",
+        capital: "Yaren District",
+        continent: "Oceania",
+        fact: "Nauru has no officially designated capital; government offices are in Yaren District."
+    },
+    {
+        name: "New Zealand",
+        capital: "Wellington",
+        continent: "Oceania",
+        fact: "New Zealand is famous for its unique birds, including the kiwi."
+    },
+    {
+        name: "Palau",
+        capital: "Ngerulmud",
+        continent: "Oceania",
+        fact: "Palau is famous for its beautiful marine ecosystems."
+    },
+    {
+        name: "Papua New Guinea",
+        capital: "Port Moresby",
+        continent: "Oceania",
+        fact: "Papua New Guinea has hundreds of distinct languages."
+    },
+    {
+        name: "Samoa",
+        capital: "Apia",
+        continent: "Oceania",
+        fact: "Samoa is an island country in the South Pacific."
+    },
+    {
+        name: "Solomon Islands",
+        capital: "Honiara",
+        continent: "Oceania",
+        fact: "The Solomon Islands consist of hundreds of islands."
+    },
+    {
+        name: "Tonga",
+        capital: "Nuku'alofa",
+        continent: "Oceania",
+        fact: "Tonga is the only remaining Polynesian monarchy."
+    },
+    {
+        name: "Tuvalu",
+        capital: "Funafuti",
+        continent: "Oceania",
+        fact: "Tuvalu is one of the world's smallest countries."
+    },
+    {
+        name: "Vanuatu",
+        capital: "Port Vila",
+        continent: "Oceania",
+        fact: "Vanuatu is made up of more than 80 islands."
+    },
+
+    // ==================== HOLY SEE ====================
+
+    {
+        name: "Holy See",
+        capital: "Vatican City",
+        continent: "Europe",
+        fact: "The Holy See is the governing entity of the Catholic Church."
+    }
+
+];
+let earth;
+
+async function createRealGlobe() {
+    const container = document.getElementById("globe");
+
+    earth = Globe()(container)
+        .backgroundColor("rgba(0,0,0,0)")
+        .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg")
+        .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+        .showAtmosphere(true)
+        .atmosphereColor("#6ec6ff")
+        .atmosphereAltitude(0.12)
+        .polygonAltitude(0.002)
+        .polygonCapColor(() => "rgba(255,255,255,0.03)")
+        .polygonSideColor(() => "rgba(255,255,255,0.02)")
+        .polygonStrokeColor(() => "rgba(255,255,255,0.8)")
+        .polygonLabel(country => `<b>${country.properties.name}</b>`);
+earth.width(380);
+earth.height(380);
+
+    earth.controls().enableDamping = true;
+    earth.controls().dampingFactor = 0.08;
+
+    const response = await fetch(
+        "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
+    );
+
+    const world = await response.json();
+
+    const countryFeatures = topojson.feature(
+        world,
+        world.objects.countries
+    ).features;
+
+    earth.polygonsData(countryFeatures);
+}
+
+createRealGlobe();
+function spinGlobe() {
+
+    const randomNumber = 
+        Math.floor(Math.random() * countries.length);
+
+    const country =
+        countries[randomNumber];
+
+    // Make the real Earth spin
+    earth.controls().autoRotate = true;
+    earth.controls().autoRotateSpeed = 8;
+
+    setTimeout(function() {
+
+        earth.controls().autoRotate = false;
+
+        document.querySelector("#result").innerHTML = `
+
+<img src="https://flagcdn.com/w320/${flagCodes[country.name]}.png"
+     alt="${country.name} flag"
+     style="width: 160px; border-radius: 8px;">
+
+            <h2>🌎 ${country.name}</h2>
+
+            <p>
+                <strong>Capital:</strong>
+                ${country.capital}
+            </p>
+
+            <p>
+                <strong>Continent:</strong>
+                ${country.continent}
+            </p>
+
+            <p>
+                <strong>🤯 Cool Fact:</strong>
+                ${country.fact}
+            </p>
+
+        `;
+
+    }, 2000);
+
+}
+
+</script>
+
+</body>
+
+</html>
